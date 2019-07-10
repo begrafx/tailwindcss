@@ -30,6 +30,27 @@ test('it can generate hover variants', () => {
   })
 })
 
+test('it can generate disabled variants', () => {
+  const input = `
+    @variants disabled {
+      .banana { color: yellow; }
+      .chocolate { color: brown; }
+    }
+  `
+
+  const output = `
+      .banana { color: yellow; }
+      .chocolate { color: brown; }
+      .disabled\\:banana:disabled { color: yellow; }
+      .disabled\\:chocolate:disabled { color: brown; }
+  `
+
+  return run(input).then(result => {
+    expect(result.css).toMatchCss(output)
+    expect(result.warnings().length).toBe(0)
+  })
+})
+
 test('it can generate active variants', () => {
   const input = `
     @variants active {
@@ -43,6 +64,27 @@ test('it can generate active variants', () => {
       .chocolate { color: brown; }
       .active\\:banana:active { color: yellow; }
       .active\\:chocolate:active { color: brown; }
+  `
+
+  return run(input).then(result => {
+    expect(result.css).toMatchCss(output)
+    expect(result.warnings().length).toBe(0)
+  })
+})
+
+test('it can generate visited variants', () => {
+  const input = `
+    @variants visited {
+      .banana { color: yellow; }
+      .chocolate { color: brown; }
+    }
+  `
+
+  const output = `
+      .banana { color: yellow; }
+      .chocolate { color: brown; }
+      .visited\\:banana:visited { color: yellow; }
+      .visited\\:chocolate:visited { color: brown; }
   `
 
   return run(input).then(result => {
@@ -213,6 +255,28 @@ test('variants are generated in the order specified', () => {
   return run(input, {
     ...config,
   }).then(result => {
+    expect(result.css).toMatchCss(output)
+    expect(result.warnings().length).toBe(0)
+  })
+})
+
+test('the built-in variant pseudo-selectors are appended before any pseudo-elements', () => {
+  const input = `
+    @variants hover, focus-within, focus, active, group-hover {
+      .placeholder-yellow::placeholder { color: yellow; }
+    }
+  `
+
+  const output = `
+    .placeholder-yellow::placeholder { color: yellow; }
+    .hover\\:placeholder-yellow:hover::placeholder { color: yellow; }
+    .focus-within\\:placeholder-yellow:focus-within::placeholder { color: yellow; }
+    .focus\\:placeholder-yellow:focus::placeholder { color: yellow; }
+    .active\\:placeholder-yellow:active::placeholder { color: yellow; }
+    .group:hover .group-hover\\:placeholder-yellow::placeholder { color: yellow; }
+  `
+
+  return run(input).then(result => {
     expect(result.css).toMatchCss(output)
     expect(result.warnings().length).toBe(0)
   })
